@@ -1,0 +1,286 @@
+.camera-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    height: 70vh;
+    margin: 20px auto;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+}
+
+.video-wrapper {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.camera-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--neon-green);
+    box-shadow: 0 0 20px var(--neon-green);
+    animation: scan 3s linear infinite;
+    opacity: 0.7;
+}
+
+@keyframes scan {
+    0% {
+        top: 0%;
+    }
+
+    50% {
+        top: 100%;
+    }
+
+    100% {
+        top: 0%;
+    }
+}
+
+.camera-controls {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    z-index: 10;
+    padding: 0;
+}
+
+.capture-btn {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: transparent;
+    border: 4px solid rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0 60px;
+}
+
+.capture-btn:active {
+    transform: scale(0.95);
+    border-color: var(--neon-green);
+}
+
+.capture-btn-inner {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    transition: all 0.2s ease;
+}
+
+.capture-btn:active .capture-btn-inner {
+    transform: scale(0.9);
+    background: var(--neon-green);
+}
+
+.capture-glow {
+    display: none;
+}
+
+.instruction {
+    display: none;
+}
+
+.camera-error {
+    padding: 20px;
+    text-align: center;
+    color: var(--neon-pink);
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.icon-btn svg {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    stroke: rgba(255, 255, 255, 0.9);
+    transition: all 0.2s ease;
+}
+
+.icon-btn:active {
+    transform: scale(0.9);
+}
+
+.icon-btn:active svg {
+    stroke: var(--neon-green);
+}
+
+.camera-fallback {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    background: #111;
+}
+
+.upload-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.upload-btn-large {
+    background: var(--neon-green);
+    color: #000;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 15px var(--neon-green);
+    transition: transform 0.2s;
+}
+
+.upload-btn-large:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px var(--neon-green);
+}
+
+.camera-placeholder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    padding: 20px;
+}
+
+.camera-icon-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pulse-ring {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border: 2px solid var(--neon-green);
+    border-radius: 50%;
+    animation: pulse-glow 2s infinite;
+}
+
+.camera-controls-new {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 0 20px;
+    z-index: 10;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid var(--neon-green);
+    border-radius: 15px;
+    padding: 20px 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    color: var(--neon-green);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.action-btn:hover {
+    background: var(--neon-green);
+    color: #000;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 255, 157, 0.5);
+}
+
+.action-btn svg {
+    transition: transform 0.3s ease;
+}
+
+.action-btn:hover svg {
+    transform: scale(1.1);
+}
+
+.switch-camera-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.4);
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    z-index: 10;
+}
+
+.switch-camera-btn svg {
+    stroke: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+}
+
+.switch-camera-btn:active {
+    transform: scale(0.9) rotate(180deg);
+}
+
+.switch-camera-btn:active svg {
+    stroke: var(--neon-green);
+}
+
+.camera-controls {
+    justify-content: center;
+    padding: 0;
+}

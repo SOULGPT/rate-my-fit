@@ -1,0 +1,113 @@
+.background-loop-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1a0033 0%, #0a0015 25%, #000510 50%, #001a33 75%, #0d0020 100%);
+    background-size: 400% 400%;
+    animation: gradient-shift 15s ease infinite;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    opacity: 0.95;
+}
+
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.marquee {
+    display: flex;
+    width: 200%;
+    animation: marquee 20s linear infinite;
+}
+
+.marquee.reverse {
+    animation-direction: reverse;
+    animation-duration: 25s;
+}
+
+.sticker-sheet {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+    margin: 0 20px;
+}
+
+.user-sticker {
+    object-fit: cover;
+    border-radius: 50%;
+    margin: 0 20px;
+    animation: float 3s ease-in-out infinite;
+    opacity: 1;
+    /* Sticker styling - white border and shadow for professional look */
+    border: 4px solid #ffffff;
+    box-shadow:
+        0 8px 16px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(255, 255, 255, 0.1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.user-sticker:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.user-sticker:nth-child(odd) {
+    animation-delay: 0.5s;
+}
+
+.user-sticker:nth-child(3n) {
+    animation-delay: 1s;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-15px) rotate(2deg);
+    }
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom,
+            rgba(0, 0, 0, 0.7) 0%,
+            transparent 15%,
+            transparent 85%,
+            rgba(0, 0, 0, 0.7) 100%);
+    pointer-events: none;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}

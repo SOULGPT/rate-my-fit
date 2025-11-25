@@ -1,0 +1,18 @@
+{
+    "appId": "com.ratemyfit.app",
+    "appName": "Rate My Fit",
+    "webDir": "dist",
+    "server": {
+        "androidScheme": "https"
+    },
+    "plugins": {
+        "SplashScreen": {
+            "launchShowDuration": 2000,
+            "backgroundColor": "#050505",
+            "showSpinner": false
+        },
+        "Camera": {
+            "saveToGallery": true
+        }
+    }
+}
