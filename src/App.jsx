@@ -36,14 +36,31 @@ const App = () => {
       });
 
       const prompt = `
-        Analyze this outfit photo.
-        Identify items: top, bottom, shoes, accessories.
-        For each item: color, detail, style (streetwear, casual, luxury, etc), estimated price range ($), possible brand.
-        Rate the overall outfit 0-10.
-        Give scores (0-10) for: Style, Colors, Trend.
-        Give a "Drip Level" score (0-1000).
-        Provide a short, bold, energetic, Gen Z style summary (max 2 sentences).
-        Return ONLY raw valid JSON with this structure (no markdown code blocks, no other text):
+        Analyze this outfit photo with high precision.
+        
+        1. BRAND RECOGNITION: Look closely for logos, signature design patterns (e.g., Nike Swoosh, Adidas stripes, Gucci print, Supreme box logo), and specific style markers to identify brands for:
+           - Top
+           - Bottom
+           - Shoes (Be very specific, e.g., "Nike Air Jordan 1", "Yeezy 350")
+           - Accessories
+        
+        2. RATING (0-10): Be CRITICAL and honest. Do NOT default to 7.
+           - Use the full range: 2-4 for poor effort, 5-6 for average, 7-8 for good, 9 for amazing, 10 ONLY for absolute perfection.
+           - If the fit is basic, rate it lower (5-6).
+           - If it's unique and well-coordinated, rate it higher (8-9).
+        
+        3. ANALYSIS:
+           - For each item: color, specific detail, style category (streetwear, luxury, vintage, techwear, etc.), estimated price range ($), and DETECTED BRAND (if unsure, say "Unbranded" or "Similar to [Brand]").
+        
+        4. SCORES (0-10):
+           - Style: Creativity and silhouette.
+           - Colors: Coordination and palette.
+           - Trend: How current is the look?
+           - Drip Level: 0-1000 (be generous for fire fits).
+        
+        5. SUMMARY: A short, bold, energetic, Gen Z style summary (max 2 sentences). Use slang like "clean", "fire", "mid", "drip".
+
+        Return ONLY raw valid JSON with this structure:
         {
           "rating": number,
           "summary": "string",

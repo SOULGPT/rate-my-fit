@@ -9,15 +9,19 @@ const BackgroundLoop = () => {
   useEffect(() => {
     // Listen for real-time sticker updates from Firebase
     const stickersRef = ref(database, 'stickers');
-    const stickersQuery = query(stickersRef, orderByChild('timestamp'), limitToLast(50));
+    const stickersQuery = query(stickersRef, orderByChild('timestamp'), limitToLast(100));
 
     const unsubscribe = onValue(stickersQuery, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const stickerArray = Object.entries(data).map(([id, sticker]) => ({
-          id,
-          ...sticker
-        }));
+        const stickerArray = Object.entries(data)
+          .map(([id, sticker]) => ({
+            id,
+            ...sticker
+          }))
+          .filter(sticker => sticker.image); // Ensure image exists
+
+        console.log(`Loaded ${stickerArray.length} stickers for background`);
         setStickers(stickerArray);
       }
     }, (error) => {

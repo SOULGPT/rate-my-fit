@@ -192,6 +192,9 @@ const StickerCreator = ({ image, onClose, rating }) => {
                     size: stickerSize,
                     emojis: emojis
                 });
+
+                // Feedback for user
+                alert("✨ Sticker shared to the live background!");
             }
 
             // Download sticker
