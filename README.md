@@ -1,6 +1,7 @@
 # Rate My Fit 🔥
+> **Latest Update:** 2025-11-27 (Auth & Safety Features Added)
 
-AI-powered outfit rating app. Upload your fit, get instant AI analysis with scores and compliments, create custom stickers, and share with the community.
+AI-powered outfit analyzer and sticker creator. Snap a pic, get rated, and join the global drip feed.with scores and compliments, create custom stickers, and share with the community.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)
 ![Platform](https://img.shields.io/badge/platform-Web%20%7C%20iOS%20%7C%20Android-blue)
