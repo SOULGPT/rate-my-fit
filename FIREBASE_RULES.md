@@ -6,10 +6,10 @@ If you see an error like **"Permission denied"** or **"Client is offline"**, you
 1.  Open [https://console.firebase.google.com/](https://console.firebase.google.com/)
 2.  Select your project **"rate-my-fit"**.
 
-## 2. Update Realtime Database Rules
+## 2. Update Realtime Database Rules (Copy & Paste)
 1.  Click **"Build"** -> **"Realtime Database"** in the left sidebar.
 2.  Click the **"Rules"** tab.
-3.  **Replace** the existing rules with this:
+3.  **Delete everything** and paste this JSON:
 
 ```json
 {
@@ -19,14 +19,12 @@ If you see an error like **"Permission denied"** or **"Client is offline"**, you
   }
 }
 ```
-*(Note: This allows anyone to read/write. For production, we can make it stricter later, but this ensures the app works now.)*
-
 4.  Click **"Publish"**.
 
-## 3. Update Storage Rules (If using Storage)
+## 3. Update Storage Rules (Copy & Paste)
 1.  Click **"Build"** -> **"Storage"**.
 2.  Click the **"Rules"** tab.
-3.  Replace with:
+3.  **Delete everything** and paste this:
 
 ```text
 rules_version = '2';
