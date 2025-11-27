@@ -49,125 +49,245 @@ const StickerCreator = ({ image, onClose, rating, data }) => {
         canvas.style.height = `${CARD_HEIGHT}px`;
         ctx.scale(SCALE, SCALE);
 
-        // 1. Draw Card Background
-        const gradient = ctx.createLinearGradient(0, 0, CARD_WIDTH, CARD_HEIGHT);
-        if (rating === 10) {
-            gradient.addColorStop(0, '#2a2a2a');
-            gradient.addColorStop(0.5, '#443300'); // Gold tint
-            gradient.addColorStop(1, '#1a1a1a');
-        } else if (rating >= 8) {
-            gradient.addColorStop(0, '#1a1a2e');
-            gradient.addColorStop(0.5, '#300030'); // Purple tint
-            gradient.addColorStop(1, '#000000');
-        } else {
-            gradient.addColorStop(0, '#1a1a1a');
-            gradient.addColorStop(1, '#000000');
-        }
-        ctx.fillStyle = gradient;
+        // --- 1. Background: Deep Galaxy ---
+        const bgGradient = ctx.createLinearGradient(0, 0, CARD_WIDTH, CARD_HEIGHT);
+        bgGradient.addColorStop(0, '#050510');
+        bgGradient.addColorStop(0.5, '#1a0b2e');
+        bgGradient.addColorStop(1, '#000000');
+        ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
-        // 2. Draw Holographic/Neon Border
-        ctx.lineWidth = 12;
-        ctx.strokeStyle = rarity.border;
-        ctx.strokeRect(6, 6, CARD_WIDTH - 12, CARD_HEIGHT - 12);
+        // Add subtle noise/texture
+        for (let i = 0; i < 1000; i++) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.05})`;
+            ctx.fillRect(Math.random() * CARD_WIDTH, Math.random() * CARD_HEIGHT, 2, 2);
+        }
 
-        // Inner thin border
+        // --- 2. Holo Foil Effect (Rainbow Overlay) ---
+        const holoGradient = ctx.createLinearGradient(0, 0, CARD_WIDTH, CARD_HEIGHT);
+        holoGradient.addColorStop(0, 'rgba(255, 0, 0, 0.1)');
+        holoGradient.addColorStop(0.2, 'rgba(255, 255, 0, 0.1)');
+        holoGradient.addColorStop(0.4, 'rgba(0, 255, 0, 0.1)');
+        holoGradient.addColorStop(0.6, 'rgba(0, 255, 255, 0.1)');
+        holoGradient.addColorStop(0.8, 'rgba(0, 0, 255, 0.1)');
+        holoGradient.addColorStop(1, 'rgba(255, 0, 255, 0.1)');
+
+        ctx.globalCompositeOperation = 'overlay';
+        ctx.fillStyle = holoGradient;
+        ctx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+        ctx.globalCompositeOperation = 'source-over';
+
+        // --- 3. Premium Gold/Holo Border ---
+        const borderGradient = ctx.createLinearGradient(0, 0, CARD_WIDTH, CARD_HEIGHT);
+        if (rating >= 8) {
+            // Rainbow/Gold for high tiers
+            borderGradient.addColorStop(0, '#ffd700');
+            borderGradient.addColorStop(0.25, '#ff00ff');
+            borderGradient.addColorStop(0.5, '#00ffff');
+            borderGradient.addColorStop(0.75, '#ffd700');
+            borderGradient.addColorStop(1, '#ff00ff');
+        } else {
+            // Standard rarity color
+            borderGradient.addColorStop(0, rarity.color);
+            borderGradient.addColorStop(1, '#ffffff');
+        }
+
+        // Outer Glow
+        ctx.shadowColor = rarity.color;
+        ctx.shadowBlur = 20;
+        ctx.strokeStyle = borderGradient;
+        ctx.lineWidth = 15;
+        ctx.strokeRect(7.5, 7.5, CARD_WIDTH - 15, CARD_HEIGHT - 15);
+        ctx.shadowBlur = 0;
+
+        // Inner Metallic Trim
+        ctx.strokeStyle = '#fff';
         ctx.lineWidth = 2;
-        ctx.strokeStyle = '#ffffff';
-        ctx.strokeRect(16, 16, CARD_WIDTH - 32, CARD_HEIGHT - 32);
+        ctx.strokeRect(18, 18, CARD_WIDTH - 36, CARD_HEIGHT - 36);
 
-        // 3. Header (Name + Drip Level)
-        ctx.fillStyle = rarity.color;
-        ctx.font = 'bold 24px Arial';
+        // --- 4. Header (Name + HP) ---
+        ctx.fillStyle = '#fff';
+        ctx.font = '900 28px Outfit, sans-serif';
         ctx.textAlign = 'left';
+        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowBlur = 4;
         const userName = user ? user.displayName.split(' ')[0].toUpperCase() : 'PLAYER';
-        ctx.fillText(userName, 30, 55);
+        ctx.fillText(userName, 35, 60);
 
         // HP / Drip Level
         ctx.textAlign = 'right';
-        ctx.fillStyle = '#ff3b30';
-        ctx.font = 'bold 24px Arial';
-        ctx.fillText(`HP ${data?.scores?.drip || 100}`, CARD_WIDTH - 30, 55);
+        ctx.fillStyle = '#ff3b30'; // Red for HP
+        ctx.fillText(`HP ${data?.scores?.drip || 100}`, CARD_WIDTH - 35, 60);
+        ctx.shadowBlur = 0;
 
-        // 4. Main Image (The Fit)
+        // --- 5. Main Image Frame ---
         const img = new Image();
         img.onload = () => {
-            const imgX = 30;
-            const imgY = 70;
-            const imgW = CARD_WIDTH - 60;
+            const imgX = 35;
+            const imgY = 80;
+            const imgW = CARD_WIDTH - 70;
             const imgH = 280;
 
-            // Image Border
+            // Frame Background
             ctx.fillStyle = '#000';
-            ctx.fillRect(imgX - 4, imgY - 4, imgW + 8, imgH + 8);
+            ctx.fillRect(imgX, imgY, imgW, imgH);
 
-            // Draw Image (Cover fit)
+            // Draw Image
             const size = Math.min(img.width, img.height);
             const sx = (img.width - size) / 2;
             const sy = (img.height - size) / 2;
             ctx.drawImage(img, sx, sy, size, size, imgX, imgY, imgW, imgH);
 
-            // Image Frame Effect
+            // Inner Shadow on Image
+            const innerShadow = ctx.createLinearGradient(0, imgY, 0, imgY + imgH);
+            innerShadow.addColorStop(0, 'rgba(0,0,0,0.2)');
+            innerShadow.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = innerShadow;
+            ctx.fillRect(imgX, imgY, imgW, imgH);
+
+            // Gold Bevel Frame
             ctx.strokeStyle = rarity.color;
             ctx.lineWidth = 4;
             ctx.strokeRect(imgX, imgY, imgW, imgH);
 
-            // 5. Rarity Strip
-            const stripY = imgY + imgH + 15;
+            // Corner Accents
             ctx.fillStyle = rarity.color;
-            ctx.fillRect(30, stripY, CARD_WIDTH - 60, 30);
+            ctx.fillRect(imgX - 2, imgY - 2, 10, 10);
+            ctx.fillRect(imgX + imgW - 8, imgY - 2, 10, 10);
+            ctx.fillRect(imgX - 2, imgY + imgH - 8, 10, 10);
+            ctx.fillRect(imgX + imgW - 8, imgY + imgH - 8, 10, 10);
 
+            // --- 6. Rarity Ribbon ---
+            const ribbonY = imgY + imgH + 20;
+            const ribbonH = 36;
+
+            // Ribbon Gradient
+            const ribbonGrad = ctx.createLinearGradient(35, ribbonY, CARD_WIDTH - 35, ribbonY);
+            ribbonGrad.addColorStop(0, 'rgba(0,0,0,0)');
+            ribbonGrad.addColorStop(0.2, rarity.color);
+            ribbonGrad.addColorStop(0.8, rarity.color);
+            ribbonGrad.addColorStop(1, 'rgba(0,0,0,0)');
+
+            ctx.fillStyle = ribbonGrad;
+            ctx.fillRect(35, ribbonY, CARD_WIDTH - 70, ribbonH);
+
+            // Rarity Text
             ctx.fillStyle = '#000';
-            ctx.font = 'bold italic 18px Arial';
+            ctx.font = '900 italic 18px Outfit, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(`${rarity.icon} ${rarity.title} OUTFIT`, CARD_WIDTH / 2, stripY + 22);
+            ctx.fillText(`${rarity.icon} ${rarity.title} EDITION`, CARD_WIDTH / 2, ribbonY + 24);
 
-            // 6. Stats / Breakdown
-            const statsY = stripY + 50;
+            // --- 7. Outfit Breakdown ---
+            const statsY = ribbonY + 50;
             ctx.textAlign = 'left';
-            ctx.font = '14px Arial';
-            ctx.fillStyle = '#fff';
+            ctx.font = '500 14px Outfit, sans-serif';
 
             const items = data?.items || [];
             let currentY = statsY;
 
             items.slice(0, 3).forEach(item => {
-                // Bullet point
-                ctx.fillStyle = rarity.color;
+                // Gold Bullet
+                ctx.fillStyle = '#ffd700';
                 ctx.beginPath();
-                ctx.arc(40, currentY - 5, 4, 0, Math.PI * 2);
+                ctx.moveTo(45, currentY - 5);
+                ctx.lineTo(50, currentY);
+                ctx.lineTo(45, currentY + 5);
+                ctx.lineTo(40, currentY);
                 ctx.fill();
 
-                // Text
+                // Item Name
                 ctx.fillStyle = '#fff';
-                ctx.font = 'bold 14px Arial';
-                const itemName = item.name.length > 25 ? item.name.substring(0, 25) + '...' : item.name;
-                ctx.fillText(itemName.toUpperCase(), 55, currentY);
+                ctx.font = '700 14px Outfit, sans-serif';
+                const itemName = item.name.length > 22 ? item.name.substring(0, 22) + '...' : item.name;
+                ctx.fillText(itemName.toUpperCase(), 60, currentY);
 
                 // Brand/Detail
                 ctx.fillStyle = '#aaa';
-                ctx.font = '12px Arial';
+                ctx.font = '12px Outfit, sans-serif';
                 const detail = item.brand || item.details || 'Unknown';
-                ctx.fillText(detail, 55, currentY + 16);
+                ctx.fillText(detail, 60, currentY + 16);
 
                 currentY += 40;
             });
 
-            // 7. Footer Score
+            // --- 8. Rating Badge (Bottom Right) ---
+            const badgeX = CARD_WIDTH - 60;
+            const badgeY = CARD_HEIGHT - 60;
+
+            // Glow
+            ctx.shadowColor = rarity.color;
+            ctx.shadowBlur = 15;
+
+            // Circle
+            ctx.beginPath();
+            ctx.arc(badgeX, badgeY, 40, 0, Math.PI * 2);
+            ctx.fillStyle = '#000';
+            ctx.fill();
+            ctx.strokeStyle = rarity.color;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // Score
             ctx.fillStyle = rarity.color;
-            ctx.font = 'bold 40px Arial';
-            ctx.textAlign = 'right';
-            ctx.fillText(`${rating}/10`, CARD_WIDTH - 40, CARD_HEIGHT - 30);
+            ctx.font = '900 36px Outfit, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(rating, badgeX, badgeY + 10);
 
-            ctx.font = '12px Arial';
-            ctx.fillStyle = '#aaa';
-            ctx.fillText('RATING', CARD_WIDTH - 40, CARD_HEIGHT - 70);
+            ctx.font = '10px Outfit, sans-serif';
+            ctx.fillStyle = '#fff';
+            ctx.fillText('/10', badgeX + 25, badgeY + 10);
 
-            // 8. Copyright / App Name
-            ctx.textAlign = 'left';
-            ctx.font = '10px Arial';
-            ctx.fillStyle = '#555';
-            ctx.fillText('© 2025 RATE MY FIT', 30, CARD_HEIGHT - 30);
+            // --- 9. Special Edition Seal (Bottom Left) ---
+            const sealX = 60;
+            const sealY = CARD_HEIGHT - 50;
+
+            // Gold Gradient Seal
+            const sealGrad = ctx.createRadialGradient(sealX, sealY, 5, sealX, sealY, 25);
+            sealGrad.addColorStop(0, '#ffd700');
+            sealGrad.addColorStop(1, '#b8860b');
+
+            ctx.beginPath();
+            ctx.arc(sealX, sealY, 25, 0, Math.PI * 2);
+            ctx.fillStyle = sealGrad;
+            ctx.fill();
+
+            // Emboss ring
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.fillStyle = '#000';
+            ctx.font = '900 8px Outfit, sans-serif';
+            ctx.fillText("LIMITED", sealX, sealY - 2);
+            ctx.fillText("DROP", sealX, sealY + 8);
+
+            // --- 10. Sparkles (Animated Feel) ---
+            for (let i = 0; i < 15; i++) {
+                const sx = Math.random() * CARD_WIDTH;
+                const sy = Math.random() * CARD_HEIGHT;
+                const size = Math.random() * 3;
+
+                ctx.fillStyle = '#fff';
+                ctx.shadowColor = '#fff';
+                ctx.shadowBlur = 5;
+                ctx.beginPath();
+                ctx.arc(sx, sy, size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Star shape
+                if (i % 3 === 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(sx, sy - size * 3);
+                    ctx.lineTo(sx, sy + size * 3);
+                    ctx.moveTo(sx - size * 3, sy);
+                    ctx.lineTo(sx + size * 3, sy);
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+            ctx.shadowBlur = 0;
         };
         img.src = image;
     };
