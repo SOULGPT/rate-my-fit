@@ -112,6 +112,7 @@ const Results = ({ data, onRetake, image }) => {
                 <StickerCreator
                     image={image}
                     rating={rating}
+                    data={data}
                     onClose={() => setShowStickerCreator(false)}
                 />
             )}

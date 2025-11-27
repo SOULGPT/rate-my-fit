@@ -53,10 +53,6 @@ const BackgroundLoop = () => {
             src={sticker.image}
             alt="User Sticker"
             className="user-sticker"
-            style={{
-              width: `${sticker.size || 150}px`,
-              height: `${sticker.size || 150}px`
-            }}
           />
         ))}
       </div>
@@ -67,10 +63,6 @@ const BackgroundLoop = () => {
             src={sticker.image}
             alt="User Sticker"
             className="user-sticker"
-            style={{
-              width: `${sticker.size || 150}px`,
-              height: `${sticker.size || 150}px`
-            }}
           />
         ))}
       </div>

@@ -50,22 +50,22 @@
 }
 
 .user-sticker {
-    object-fit: cover;
-    border-radius: 50%;
-    margin: 0 20px;
+    height: 220px;
+    width: auto;
+    aspect-ratio: 2.5/3.5;
+    object-fit: contain;
+    border-radius: 10px;
+    margin: 0 15px;
     animation: float 3s ease-in-out infinite;
     opacity: 1;
-    /* Sticker styling - white border and shadow for professional look */
-    border: 4px solid #ffffff;
-    box-shadow:
-        0 8px 16px rgba(0, 0, 0, 0.4),
-        0 0 20px rgba(255, 255, 255, 0.1),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    /* Card styling */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
     transition: transform 0.3s ease;
 }
 
 .user-sticker:hover {
-    transform: scale(1.1) rotate(5deg);
+    transform: scale(1.1) translateY(-10px);
+    z-index: 10;
 }
 
 .user-sticker:nth-child(odd) {
