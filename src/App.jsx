@@ -1,15 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from './firebase-config';
 import Camera from './components/Camera';
 import Results from './components/Results';
 import BackgroundLoop from './components/BackgroundLoop';
-import { Sparkles } from 'lucide-react';
+import AuthPage from './components/AuthPage';
+import { Sparkles, User, LogOut } from 'lucide-react';
 import './App.css';
 
 const App = () => {
-  const [view, setView] = useState('camera'); // camera, analyzing, results
+  const [view, setView] = useState('camera'); // camera, analyzing, results, auth
   const [analysisData, setAnalysisData] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
+  const [user, setUser] = useState(null);
+  const [previousView, setPreviousView] = useState('camera');
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleAuthClick = () => {
+    if (user) {
+      // Optional: Confirm sign out or show profile menu
+      if (window.confirm("Sign out?")) {
+        signOut(auth);
+      }
+    } else {
+      setPreviousView(view);
+      setView('auth');
+    }
+  };
 
   const handleCapture = async (imageDataUrl) => {
     setCapturedImage(imageDataUrl);
@@ -143,9 +167,23 @@ const App = () => {
 
       <div className="header">
         <h1 className="logo neon-text">RATE MY FIT</h1>
+        <button className="auth-btn" onClick={handleAuthClick}>
+          {user ? (
+            <img src={user.photoURL} alt="Profile" className="user-avatar" />
+          ) : (
+            <User size={24} color="#fff" />
+          )}
+        </button>
       </div>
 
       <main className="main-content">
+        {view === 'auth' && (
+          <AuthPage
+            onBack={() => setView(previousView)}
+            onLoginSuccess={() => setView(previousView)}
+          />
+        )}
+
         {view === 'camera' && (
           <Camera onCapture={handleCapture} />
         )}
