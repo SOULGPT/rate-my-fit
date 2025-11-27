@@ -28,15 +28,19 @@ const App = () => {
       const model = genAI.getGenerativeModel({
         model: "gemini-2.0-flash",
         safetySettings: [
-          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
         ]
       });
 
       const prompt = `
-        Analyze this outfit photo with high precision.
+        STRICT SAFETY CHECK FIRST:
+        Does this image contain ANY nudity, sexual content, underwear, swimwear, suggestive poses, violence, gore, or inappropriate gestures?
+        If YES, return JSON: { "unsafe": true, "reason": "content_violation" } and STOP.
+        
+        If NO (safe outfit), proceed with analysis:
         
         1. BRAND RECOGNITION: Look closely for logos, signature design patterns (e.g., Nike Swoosh, Adidas stripes, Gucci print, Supreme box logo), and specific style markers to identify brands for:
            - Top
@@ -62,6 +66,7 @@ const App = () => {
 
         Return ONLY raw valid JSON with this structure:
         {
+          "unsafe": boolean,
           "rating": number,
           "summary": "string",
           "items": [ { "name": "string", "details": "string", "price": "string", "brand": "string" } ],
@@ -83,6 +88,12 @@ const App = () => {
       ]);
 
       const response = await result.response;
+
+      // Check if response was blocked due to safety
+      if (response.promptFeedback && response.promptFeedback.blockReason) {
+        throw new Error("SAFETY_BLOCK");
+      }
+
       const text = response.text();
       console.log("Raw AI Response:", text);
 
@@ -95,9 +106,18 @@ const App = () => {
 
       try {
         const data = JSON.parse(jsonString);
+
+        // Explicit safety check from model output
+        if (data.unsafe) {
+          throw new Error("SAFETY_VIOLATION");
+        }
+
         setAnalysisData(data);
         setView('results');
       } catch (parseError) {
+        if (parseError.message === "SAFETY_VIOLATION") {
+          throw parseError;
+        }
         console.error("JSON Parse Error:", parseError);
         console.log("Failed Text:", text);
         throw new Error("Failed to parse AI response. Please try again.");
@@ -105,7 +125,14 @@ const App = () => {
 
     } catch (error) {
       console.error("Analysis failed:", error);
-      alert(`Analysis failed: ${error.message || "Unknown error"}. Please check your API key and try again.`);
+
+      let errorMessage = "Analysis failed. Please try again.";
+
+      if (error.message.includes("SAFETY") || error.message.includes("blocked")) {
+        errorMessage = "This content is not allowed. Please upload a safe image.";
+      }
+
+      alert(errorMessage);
       setView('camera');
     }
   };

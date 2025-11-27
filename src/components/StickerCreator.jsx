@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Download, Share2, Sparkles } from 'lucide-react';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { ref, push, set } from 'firebase/database';
 import { database } from '../firebase-config';
 import './StickerCreator.css';
@@ -181,7 +182,51 @@ const StickerCreator = ({ image, onClose, rating }) => {
             const stickerData = canvasRef.current.toDataURL('image/png');
 
             if (isPublic) {
-                // Save to Firebase
+                // DOUBLE VERIFICATION: Scan image again before public upload
+                const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+                if (apiKey) {
+                    try {
+                        const genAI = new GoogleGenerativeAI(apiKey);
+                        const model = genAI.getGenerativeModel({
+                            model: "gemini-2.0-flash",
+                            safetySettings: [
+                                { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+                                { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+                                { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+                                { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+                            ]
+                        });
+
+                        const prompt = `
+                            CRITICAL SAFETY SCAN:
+                            Does this image contain ANY nudity, sexual content, underwear, swimwear, suggestive poses, violence, gore, or inappropriate gestures?
+                            Answer ONLY "UNSAFE" or "SAFE".
+                        `;
+
+                        // Remove header from data URL
+                        const base64Image = stickerData.split(',')[1];
+
+                        const result = await model.generateContent([
+                            prompt,
+                            { inlineData: { data: base64Image, mimeType: "image/png" } },
+                        ]);
+
+                        const response = await result.response;
+                        const text = response.text().trim().toUpperCase();
+
+                        if (text.includes("UNSAFE") || (response.promptFeedback && response.promptFeedback.blockReason)) {
+                            throw new Error("SAFETY_VIOLATION");
+                        }
+
+                    } catch (safetyError) {
+                        console.error("Safety check failed:", safetyError);
+                        alert("This content is not allowed. Please upload a safe image.");
+                        setIsSubmitting(false);
+                        return; // STOP HERE
+                    }
+                }
+
+                // Save to Firebase (Only if safety check passed)
                 const stickersRef = ref(database, 'stickers');
                 const newStickerRef = push(stickersRef);
 
