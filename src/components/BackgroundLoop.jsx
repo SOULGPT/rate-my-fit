@@ -9,7 +9,8 @@ const BackgroundLoop = () => {
   useEffect(() => {
     // Listen for real-time sticker updates from Firebase
     const stickersRef = ref(database, 'stickers');
-    const stickersQuery = query(stickersRef, orderByChild('timestamp'), limitToLast(100));
+    // OPTIMIZATION: Limit to 30 to prevent lag (Base64 images are heavy)
+    const stickersQuery = query(stickersRef, orderByChild('timestamp'), limitToLast(30));
 
     const unsubscribe = onValue(stickersQuery, (snapshot) => {
       const data = snapshot.val();
@@ -52,6 +53,7 @@ const BackgroundLoop = () => {
             key={`${sticker.id}-${index}`}
             src={sticker.image}
             alt="User Sticker"
+            loading="lazy"
             className="user-sticker"
           />
         ))}
@@ -62,6 +64,7 @@ const BackgroundLoop = () => {
             key={`reverse-${sticker.id}-${index}`}
             src={sticker.image}
             alt="User Sticker"
+            loading="lazy"
             className="user-sticker"
           />
         ))}

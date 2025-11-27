@@ -1,6 +1,6 @@
 // Service Worker for Rate My Fit PWA
 // Service Worker for Rate My Fit PWA
-const CACHE_NAME = 'rate-my-fit-v2';
+const CACHE_NAME = 'rate-my-fit-v3';
 const urlsToCache = [
     '/',
     '/index.html',
