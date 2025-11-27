@@ -262,11 +262,43 @@ const StickerCreator = ({ image, onClose, rating, data }) => {
                 alert("✨ Premium Card shared to the live background!");
             }
 
-            // Download
-            const link = document.createElement('a');
-            link.href = stickerData;
-            link.download = `fit-card-${rating}.png`;
-            link.click();
+            // Convert data URL to Blob for sharing
+            const res = await fetch(stickerData);
+            const blob = await res.blob();
+            const file = new File([blob], `rate-my-fit-${rating}.png`, { type: 'image/png' });
+
+            // Try Native Share (Mobile)
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        title: 'Rate My Fit',
+                        text: `I got a ${rating}/10 on Rate My Fit! ⚡ Check out my premium card!`,
+                        url: window.location.origin, // Share App Link
+                        files: [file]
+                    });
+                } catch (shareError) {
+                    console.log('Share cancelled or failed:', shareError);
+                    // Fallback to download if share fails/cancelled
+                    const link = document.createElement('a');
+                    link.href = stickerData;
+                    link.download = `fit-card-${rating}.png`;
+                    link.click();
+                }
+            } else {
+                // Fallback for Desktop / Unsupported Browsers
+                const link = document.createElement('a');
+                link.href = stickerData;
+                link.download = `fit-card-${rating}.png`;
+                link.click();
+
+                // Copy link to clipboard as a bonus
+                try {
+                    await navigator.clipboard.writeText(`Check out Rate My Fit: ${window.location.origin}`);
+                    alert("Card downloaded! App link copied to clipboard to share.");
+                } catch (e) {
+                    // Ignore clipboard error
+                }
+            }
 
             onClose();
         } catch (error) {
