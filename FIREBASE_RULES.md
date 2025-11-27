@@ -6,7 +6,7 @@ If you see an error like **"Permission denied"** or **"Client is offline"**, you
 1.  Open [https://console.firebase.google.com/](https://console.firebase.google.com/)
 2.  Select your project **"rate-my-fit"**.
 
-## 2. Update Realtime Database Rules (Copy & Paste)
+## 2. Update Realtime Database Rules (Secure & Production Ready)
 1.  Click **"Build"** -> **"Realtime Database"** in the left sidebar.
 2.  Click the **"Rules"** tab.
 3.  **Delete everything** and paste this JSON:
@@ -14,14 +14,21 @@ If you see an error like **"Permission denied"** or **"Client is offline"**, you
 ```json
 {
   "rules": {
-    ".read": true,
-    ".write": true
+    "stickers": {
+      ".read": true,
+      "$sticker_id": {
+        // Only allow creation if user is logged in
+        ".write": "auth != null && !data.exists()",
+        // Validate data structure
+        ".validate": "newData.hasChildren(['image', 'rating', 'userId'])"
+      }
+    }
   }
 }
 ```
 4.  Click **"Publish"**.
 
-## 3. Update Storage Rules (Copy & Paste)
+## 3. Update Storage Rules (Secure & Production Ready)
 1.  Click **"Build"** -> **"Storage"**.
 2.  Click the **"Rules"** tab.
 3.  **Delete everything** and paste this:
@@ -31,7 +38,12 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /{allPaths=**} {
-      allow read, write: if true;
+      // Allow public read
+      allow read: if true;
+      // Allow write only if user is logged in and file is an image < 5MB
+      allow write: if request.auth != null 
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
     }
   }
 }
