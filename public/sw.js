@@ -1,5 +1,6 @@
 // Service Worker for Rate My Fit PWA
-const CACHE_NAME = 'rate-my-fit-v1';
+// Service Worker for Rate My Fit PWA
+const CACHE_NAME = 'rate-my-fit-v2';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -20,26 +21,42 @@ self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - Network First for HTML, Stale-While-Revalidate for assets
 self.addEventListener('fetch', (event) => {
+    // For navigation requests (HTML pages), try network first
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request)
+                .then((networkResponse) => {
+                    return caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, networkResponse.clone());
+                        return networkResponse;
+                    });
+                })
+                .catch(() => {
+                    return caches.match(event.request);
+                })
+        );
+        return;
+    }
+
+    // For other assets (JS, CSS, Images), try cache first, then network
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
-                // Cache hit - return response
+                // Return cached response if found
                 if (response) {
                     return response;
                 }
 
+                // Otherwise fetch from network
                 return fetch(event.request).then(
                     (response) => {
-                        // Check if we received a valid response
                         if (!response || response.status !== 200 || response.type !== 'basic') {
                             return response;
                         }
 
-                        // Clone the response
                         const responseToCache = response.clone();
-
                         caches.open(CACHE_NAME)
                             .then((cache) => {
                                 cache.put(event.request, responseToCache);
