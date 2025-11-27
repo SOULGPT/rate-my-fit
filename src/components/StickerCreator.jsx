@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Download, Share2, Sparkles } from 'lucide-react';
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import { X, Download, Share2, Sparkles, LogIn } from 'lucide-react';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google-generativeai";
 import { ref, push, set } from 'firebase/database';
-import { database } from '../firebase-config';
+import { signInWithPopup } from 'firebase/auth';
+import { database, auth, googleProvider } from '../firebase-config';
 import './StickerCreator.css';
 
 const StickerCreator = ({ image, onClose, rating }) => {
@@ -10,18 +11,43 @@ const StickerCreator = ({ image, onClose, rating }) => {
     const [borderColor, setBorderColor] = useState('#00ff9d');
     const [borderWidth, setBorderWidth] = useState(8);
     const [stickerSize, setStickerSize] = useState(200);
-    const [isPublic, setIsPublic] = useState(true);
+    const [isPublic, setIsPublic] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [emojis, setEmojis] = useState([]);
+    const [user, setUser] = useState(null);
 
     // Popular emojis for selection
     const availableEmojis = ['🔥', '❤️', '⭐', '✨', '💯', '👑', '😍', '🎉', '💪', '🌟', '💎', '🚀'];
 
     useEffect(() => {
+        // Check if user is already logged in
+        const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+            setUser(currentUser);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
         if (image && canvasRef.current) {
             drawSticker();
         }
-    }, [image, borderColor, borderWidth, stickerSize, emojis]);
+    }, [image, borderColor, borderWidth, stickerSize, emojis, user]);
+
+    const handlePublicToggle = async (e) => {
+        const checked = e.target.checked;
+        if (checked && !user) {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                setUser(result.user);
+                setIsPublic(true);
+            } catch (error) {
+                console.error("Login failed:", error);
+                setIsPublic(false);
+            }
+        } else {
+            setIsPublic(checked);
+        }
+    };
 
     const drawSticker = () => {
         const canvas = canvasRef.current;
@@ -155,6 +181,30 @@ const StickerCreator = ({ image, onClose, rating }) => {
             ctx.fillStyle = rating === 10 ? '#ffcc00' : '#00ff9d';
             ctx.fillText(compliment, centerX, centerY + displaySize * 0.08);
 
+            // Draw User Name (if logged in)
+            if (user && user.displayName) {
+                const name = user.displayName.split(' ')[0]; // First name only
+                const nameY = centerY + displaySize * 0.35;
+
+                // Background pill for name
+                ctx.font = `bold ${Math.floor(displaySize * 0.06)}px Arial`;
+                const textWidth = ctx.measureText(name).width;
+                const padding = displaySize * 0.04;
+
+                ctx.beginPath();
+                ctx.roundRect(centerX - textWidth / 2 - padding / 2, nameY - displaySize * 0.04, textWidth + padding, displaySize * 0.08, 10);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fill();
+                ctx.strokeStyle = borderColor;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Name text
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = 'transparent';
+                ctx.fillText(name, centerX, nameY);
+            }
+
             // Reset shadow
             ctx.shadowColor = 'transparent';
             ctx.shadowBlur = 0;
@@ -182,6 +232,12 @@ const StickerCreator = ({ image, onClose, rating }) => {
             const stickerData = canvasRef.current.toDataURL('image/png');
 
             if (isPublic) {
+                if (!user) {
+                    alert("Please sign in to share your sticker!");
+                    setIsSubmitting(false);
+                    return;
+                }
+
                 // DOUBLE VERIFICATION: Scan image again before public upload
                 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
                 if (apiKey) {
@@ -235,7 +291,9 @@ const StickerCreator = ({ image, onClose, rating }) => {
                     rating: rating,
                     timestamp: Date.now(),
                     size: stickerSize,
-                    emojis: emojis
+                    emojis: emojis,
+                    userName: user.displayName,
+                    userId: user.uid
                 });
 
                 // Feedback for user
@@ -350,13 +408,15 @@ const StickerCreator = ({ image, onClose, rating }) => {
                     </div>
 
                     <div className="control-group">
-                        <label className="toggle-label">
+                        <label className="toggle-label" style={{ opacity: 1 }}>
                             <input
                                 type="checkbox"
                                 checked={isPublic}
-                                onChange={(e) => setIsPublic(e.target.checked)}
+                                onChange={handlePublicToggle}
                             />
-                            <span>Share publicly (appears in background)</span>
+                            <span>
+                                {user ? `Share as ${user.displayName.split(' ')[0]}` : 'Share publicly (Sign in required)'}
+                            </span>
                         </label>
                     </div>
                 </div>
@@ -368,8 +428,8 @@ const StickerCreator = ({ image, onClose, rating }) => {
                 >
                     {isSubmitting ? 'Creating...' : (
                         <>
-                            <Download size={20} />
-                            {isPublic ? 'Create & Share Sticker' : 'Download Sticker'}
+                            {isPublic ? <Share2 size={20} /> : <Download size={20} />}
+                            {isPublic ? 'Share & Download' : 'Download Only'}
                         </>
                     )}
                 </button>
