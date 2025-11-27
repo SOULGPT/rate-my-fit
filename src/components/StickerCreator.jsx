@@ -271,7 +271,7 @@ const StickerCreator = ({ image, onClose, rating, data }) => {
             onClose();
         } catch (error) {
             console.error('Error creating card:', error);
-            alert('Failed to create card. Please try again.');
+            alert(`Failed to create card: ${error.message}`);
         } finally {
             setIsSubmitting(false);
         }
