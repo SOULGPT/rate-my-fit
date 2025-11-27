@@ -238,17 +238,17 @@ const StickerCreator = ({ image, onClose, rating, data }) => {
             ctx.fillStyle = '#fff';
             ctx.fillText('/10', badgeX + 25, badgeY + 10);
 
-            // --- 9. Special Edition Seal (Bottom Left) ---
-            const sealX = 60;
-            const sealY = CARD_HEIGHT - 50;
+            // --- 9. Special Edition Seal (Moved to Top Right of Image) ---
+            const sealX = CARD_WIDTH - 60;
+            const sealY = 115;
 
             // Gold Gradient Seal
-            const sealGrad = ctx.createRadialGradient(sealX, sealY, 5, sealX, sealY, 25);
+            const sealGrad = ctx.createRadialGradient(sealX, sealY, 5, sealX, sealY, 22);
             sealGrad.addColorStop(0, '#ffd700');
             sealGrad.addColorStop(1, '#b8860b');
 
             ctx.beginPath();
-            ctx.arc(sealX, sealY, 25, 0, Math.PI * 2);
+            ctx.arc(sealX, sealY, 22, 0, Math.PI * 2);
             ctx.fillStyle = sealGrad;
             ctx.fill();
 
@@ -258,7 +258,8 @@ const StickerCreator = ({ image, onClose, rating, data }) => {
             ctx.stroke();
 
             ctx.fillStyle = '#000';
-            ctx.font = '900 8px Outfit, sans-serif';
+            ctx.font = '900 7px Outfit, sans-serif';
+            ctx.textAlign = 'center';
             ctx.fillText("LIMITED", sealX, sealY - 2);
             ctx.fillText("DROP", sealX, sealY + 8);
 
