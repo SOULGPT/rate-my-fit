@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Download, Share2, Sparkles, LogIn } from 'lucide-react';
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google-generativeai";
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { ref, push, set } from 'firebase/database';
 import { signInWithPopup } from 'firebase/auth';
 import { database, auth, googleProvider } from '../firebase-config';
