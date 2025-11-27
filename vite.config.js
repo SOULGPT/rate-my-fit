@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/',
   build: {
     outDir: 'dist',
     sourcemap: false,
@@ -11,9 +12,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'firebase': ['firebase/app', 'firebase/database', 'firebase/auth'],
-          'ai': ['@google/generative-ai']
+          'vendor': ['react', 'react-dom', 'framer-motion', 'lucide-react'],
+          'firebase': ['firebase/app', 'firebase/auth', 'firebase/database'],
         }
       }
     }
