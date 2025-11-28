@@ -1,6 +1,6 @@
 {
-    "name": "Rate My Fit",
-    "short_name": "RateMyFit",
+    "name": "DRIPR8",
+    "short_name": "DRIPR8",
     "description": "AI-powered outfit rating app. Upload your fit, get instant AI analysis, and share your style with the community.",
     "start_url": "/",
     "display": "standalone",

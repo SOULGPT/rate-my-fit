@@ -238,6 +238,12 @@ const StickerCreator = ({ image, onClose, rating, data }) => {
             ctx.fillStyle = '#fff';
             ctx.fillText('/10', badgeX + 25, badgeY + 10);
 
+            // 8. Copyright / App Name
+            ctx.textAlign = 'left';
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#555';
+            ctx.fillText('© 2025 DRIPR8', 30, CARD_HEIGHT - 30);
+
             // --- 9. Special Edition Seal (Moved to Top Right of Image) ---
             const sealX = CARD_WIDTH - 60;
             const sealY = 115;
@@ -392,8 +398,8 @@ const StickerCreator = ({ image, onClose, rating, data }) => {
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
                     await navigator.share({
-                        title: 'Rate My Fit',
-                        text: `I got a ${rating}/10 on Rate My Fit! ⚡ Check out my premium card!`,
+                        title: 'DRIPR8',
+                        text: `I got a ${rating}/10 on DRIPR8! ⚡ Check out my premium card!`,
                         url: window.location.origin, // Share App Link
                         files: [file]
                     });
@@ -414,7 +420,7 @@ const StickerCreator = ({ image, onClose, rating, data }) => {
 
                 // Copy link to clipboard as a bonus
                 try {
-                    await navigator.clipboard.writeText(`Check out Rate My Fit: ${window.location.origin}`);
+                    await navigator.clipboard.writeText(`Check out DRIPR8: ${window.location.origin}`);
                     alert("Card downloaded! App link copied to clipboard to share.");
                 } catch (e) {
                     // Ignore clipboard error

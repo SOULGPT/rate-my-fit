@@ -16,7 +16,7 @@ const Results = ({ data, onRetake, image }) => {
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: 'Rate My Fit',
+                    title: 'DRIPR8',
                     text: `I got a ${rating}/10 on my fit! ${summary}`,
                     url: window.location.href,
                 });

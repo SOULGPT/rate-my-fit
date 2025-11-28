@@ -166,7 +166,7 @@ const App = () => {
       <BackgroundLoop />
 
       <div className="header">
-        <h1 className="logo neon-text">RATE MY FIT</h1>
+        <h1 className="logo neon-text">DRIPR8</h1>
         <button className="auth-btn" onClick={handleAuthClick}>
           {user ? (
             <img src={user.photoURL} alt="Profile" className="user-avatar" />
