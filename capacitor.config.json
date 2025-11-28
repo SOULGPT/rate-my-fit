@@ -1,6 +1,6 @@
 {
-    "appId": "com.ratemyfit.app",
-    "appName": "Rate My Fit",
+    "appId": "com.dripr8.app",
+    "appName": "DRIPR8",
     "webDir": "dist",
     "server": {
         "androidScheme": "https"
