@@ -2,11 +2,13 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: var(--bg-color);
+    background: transparent;
+    /* Show BackgroundLoop */
     color: var(--text-color);
     overflow-y: auto;
     padding-bottom: 80px;
-    /* Space for bottom nav if needed */
+    position: relative;
+    z-index: 10;
 }
 
 .landing-hero {
@@ -16,7 +18,10 @@
     justify-content: center;
     text-align: center;
     padding: 40px 20px;
-    background: radial-gradient(circle at center, #1a1a2e 0%, #000000 70%);
+    background: rgba(0, 0, 0, 0.6);
+    /* Semi-transparent overlay */
+    backdrop-filter: blur(5px);
+    /* Subtle blur */
     position: relative;
 }
 
