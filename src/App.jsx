@@ -5,16 +5,17 @@ import { auth } from './firebase-config';
 import Camera from './components/Camera';
 import Results from './components/Results';
 import BackgroundLoop from './components/BackgroundLoop';
-import AuthPage from './components/AuthPage';
+import LandingPage from './components/LandingPage';
+import LegalPage from './components/LegalPage';
 import { Sparkles, User, LogOut } from 'lucide-react';
 import './App.css';
 
 const App = () => {
-  const [view, setView] = useState('camera'); // camera, analyzing, results, auth
+  const [view, setView] = useState('landing'); // landing, camera, analyzing, results, auth, privacy, terms
   const [analysisData, setAnalysisData] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [user, setUser] = useState(null);
-  const [previousView, setPreviousView] = useState('camera');
+  const [previousView, setPreviousView] = useState('landing');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -23,9 +24,18 @@ const App = () => {
     return () => unsubscribe();
   }, []);
 
+  // Handle URL routing for Privacy/Terms
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/privacy') {
+      setView('privacy');
+    } else if (path === '/terms') {
+      setView('terms');
+    }
+  }, []);
+
   const handleAuthClick = () => {
     if (user) {
-      // Optional: Confirm sign out or show profile menu
       if (window.confirm("Sign out?")) {
         signOut(auth);
       }
@@ -165,18 +175,34 @@ const App = () => {
     <div className="app">
       <BackgroundLoop />
 
-      <div className="header">
-        <h1 className="logo neon-text">DRIPR8</h1>
-        <button className="auth-btn" onClick={handleAuthClick}>
-          {user ? (
-            <img src={user.photoURL} alt="Profile" className="user-avatar" />
-          ) : (
-            <User size={24} color="#fff" />
-          )}
-        </button>
-      </div>
+      {view !== 'landing' && view !== 'privacy' && view !== 'terms' && (
+        <div className="header">
+          <h1 className="logo neon-text">DRIPR8</h1>
+          <button className="auth-btn" onClick={handleAuthClick}>
+            {user ? (
+              <img src={user.photoURL} alt="Profile" className="user-avatar" />
+            ) : (
+              <User size={24} color="#fff" />
+            )}
+          </button>
+        </div>
+      )}
 
       <main className="main-content">
+        {view === 'landing' && (
+          <LandingPage
+            onStart={() => setView('camera')}
+            onOpenLegal={(type) => setView(type)}
+          />
+        )}
+
+        {(view === 'privacy' || view === 'terms') && (
+          <LegalPage
+            type={view}
+            onClose={() => setView('landing')}
+          />
+        )}
+
         {view === 'auth' && (
           <AuthPage
             onBack={() => setView(previousView)}
