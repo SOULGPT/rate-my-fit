@@ -2,11 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Download, Share2, Sparkles, LogIn } from 'lucide-react';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { ref, push, set } from 'firebase/database';
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { database, auth, googleProvider } from '../firebase-config';
 import './StickerCreator.css';
-
 import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 const StickerCreator = ({ image, onClose, rating, data }) => {
     const canvasRef = useRef(null);
@@ -303,17 +303,22 @@ const StickerCreator = ({ image, onClose, rating, data }) => {
     };
 
     const handlePublicToggle = async (e) => {
-        if (isNative && !user) {
-            alert("Public sharing requires sign-in, which is currently available on the web version only.");
-            return;
-        }
-
         const checked = e.target.checked;
         if (checked && !user) {
             try {
-                const result = await signInWithPopup(auth, googleProvider);
-                setUser(result.user);
-                setIsPublic(true);
+                if (isNative) {
+                    // Native Sign In
+                    const googleUser = await GoogleAuth.signIn();
+                    const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+                    const result = await signInWithCredential(auth, credential);
+                    setUser(result.user);
+                    setIsPublic(true);
+                } else {
+                    // Web Sign In
+                    const result = await signInWithPopup(auth, googleProvider);
+                    setUser(result.user);
+                    setIsPublic(true);
+                }
             } catch (error) {
                 console.error("Login failed:", error);
                 setIsPublic(false);
@@ -467,10 +472,9 @@ const StickerCreator = ({ image, onClose, rating, data }) => {
                                 type="checkbox"
                                 checked={isPublic}
                                 onChange={handlePublicToggle}
-                                disabled={isNative && !user}
                             />
                             <span>
-                                {user ? `Share as ${user.displayName.split(' ')[0]}` : (isNative ? 'Share publicly (Web Only)' : 'Share publicly (Sign in required)')}
+                                {user ? `Share as ${user.displayName.split(' ')[0]}` : 'Share publicly (Sign in required)'}
                             </span>
                         </label>
                     </div>

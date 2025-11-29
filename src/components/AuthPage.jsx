@@ -1,18 +1,36 @@
-import React, { useState } from 'react';
-import { signInWithPopup } from 'firebase/auth';
+import React, { useState, useEffect } from 'react';
+import { signInWithPopup, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase-config';
 import { LogIn, ArrowLeft } from 'lucide-react';
 import './AuthPage.css';
-
 import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 const AuthPage = ({ onBack, onLoginSuccess }) => {
     const [error, setError] = useState(null);
     const isNative = Capacitor.isNativePlatform();
 
+    useEffect(() => {
+        if (isNative) {
+            GoogleAuth.initialize({
+                clientId: import.meta.env.VITE_FIREBASE_CLIENT_ID, // Ensure this env var exists or hardcode if needed
+                scopes: ['profile', 'email'],
+                grantOfflineAccess: true,
+            });
+        }
+    }, [isNative]);
+
     const handleGoogleSignIn = async () => {
         try {
-            await signInWithPopup(auth, googleProvider);
+            if (isNative) {
+                // Native Sign In
+                const googleUser = await GoogleAuth.signIn();
+                const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+                await signInWithCredential(auth, credential);
+            } else {
+                // Web Sign In
+                await signInWithPopup(auth, googleProvider);
+            }
             onLoginSuccess();
         } catch (err) {
             console.error("Login failed:", err);
@@ -32,17 +50,10 @@ const AuthPage = ({ onBack, onLoginSuccess }) => {
 
                 {error && <div className="error-message">{error}</div>}
 
-                {isNative ? (
-                    <div style={{ padding: '20px', textAlign: 'center', color: '#aaa', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}>
-                        <p>Sign in is currently available on the web version only.</p>
-                        <p style={{ marginTop: '10px', fontSize: '0.9rem' }}>You can still use all features as a guest!</p>
-                    </div>
-                ) : (
-                    <button className="google-btn" onClick={handleGoogleSignIn}>
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-                        <span>Sign in with Google</span>
-                    </button>
-                )}
+                <button className="google-btn" onClick={handleGoogleSignIn}>
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+                    <span>Sign in with Google</span>
+                </button>
 
                 <p className="terms">
                     By continuing, you agree to our Terms of Service and Privacy Policy.
