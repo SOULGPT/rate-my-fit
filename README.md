@@ -1,4 +1,4 @@
-# Rate My Fit 🔥
+# DRIPR8 🔥
 > **Latest Update:** 2025-11-27 (Auth & Safety Features Added)
 
 AI-powered outfit analyzer and sticker creator. Snap a pic, get rated, and join the global drip feed.with scores and compliments, create custom stickers, and share with the community.
@@ -102,6 +102,6 @@ VITE_FIREBASE_APP_ID=your_app_id
 
 Private project - All rights reserved
 
-## 🙏 Credits
+## 🙏 Credits - EIDENAK
 
 Built with ❤️ using React, Vite, Firebase, and Google Gemini AI
