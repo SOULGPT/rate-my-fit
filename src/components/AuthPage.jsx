@@ -4,8 +4,11 @@ import { auth, googleProvider } from '../firebase-config';
 import { LogIn, ArrowLeft } from 'lucide-react';
 import './AuthPage.css';
 
+import { Capacitor } from '@capacitor/core';
+
 const AuthPage = ({ onBack, onLoginSuccess }) => {
     const [error, setError] = useState(null);
+    const isNative = Capacitor.isNativePlatform();
 
     const handleGoogleSignIn = async () => {
         try {
@@ -29,10 +32,17 @@ const AuthPage = ({ onBack, onLoginSuccess }) => {
 
                 {error && <div className="error-message">{error}</div>}
 
-                <button className="google-btn" onClick={handleGoogleSignIn}>
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-                    <span>Sign in with Google</span>
-                </button>
+                {isNative ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#aaa', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}>
+                        <p>Sign in is currently available on the web version only.</p>
+                        <p style={{ marginTop: '10px', fontSize: '0.9rem' }}>You can still use all features as a guest!</p>
+                    </div>
+                ) : (
+                    <button className="google-btn" onClick={handleGoogleSignIn}>
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+                        <span>Sign in with Google</span>
+                    </button>
+                )}
 
                 <p className="terms">
                     By continuing, you agree to our Terms of Service and Privacy Policy.

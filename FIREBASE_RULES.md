@@ -16,6 +16,8 @@ If you see an error like **"Permission denied"** or **"Client is offline"**, you
   "rules": {
     "stickers": {
       ".read": true,
+      ".write": "auth != null",
+      ".indexOn": ["timestamp"],
       "$sticker_id": {
         // Only allow creation if user is logged in
         ".write": "auth != null && !data.exists()",

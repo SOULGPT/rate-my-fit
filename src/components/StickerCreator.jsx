@@ -6,11 +6,14 @@ import { signInWithPopup } from 'firebase/auth';
 import { database, auth, googleProvider } from '../firebase-config';
 import './StickerCreator.css';
 
+import { Capacitor } from '@capacitor/core';
+
 const StickerCreator = ({ image, onClose, rating, data }) => {
     const canvasRef = useRef(null);
     const [isPublic, setIsPublic] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [user, setUser] = useState(null);
+    const isNative = Capacitor.isNativePlatform();
 
     // Card Dimensions (Standard Trading Card Ratio)
     const CARD_WIDTH = 400;
@@ -300,6 +303,11 @@ const StickerCreator = ({ image, onClose, rating, data }) => {
     };
 
     const handlePublicToggle = async (e) => {
+        if (isNative && !user) {
+            alert("Public sharing requires sign-in, which is currently available on the web version only.");
+            return;
+        }
+
         const checked = e.target.checked;
         if (checked && !user) {
             try {
@@ -454,14 +462,15 @@ const StickerCreator = ({ image, onClose, rating, data }) => {
 
                 <div className="sticker-controls">
                     <div className="control-group">
-                        <label className="toggle-label" style={{ opacity: 1 }}>
+                        <label className="toggle-label" style={{ opacity: (isNative && !user) ? 0.5 : 1 }}>
                             <input
                                 type="checkbox"
                                 checked={isPublic}
                                 onChange={handlePublicToggle}
+                                disabled={isNative && !user}
                             />
                             <span>
-                                {user ? `Share as ${user.displayName.split(' ')[0]}` : 'Share publicly (Sign in required)'}
+                                {user ? `Share as ${user.displayName.split(' ')[0]}` : (isNative ? 'Share publicly (Web Only)' : 'Share publicly (Sign in required)')}
                             </span>
                         </label>
                     </div>

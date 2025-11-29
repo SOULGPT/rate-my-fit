@@ -7,6 +7,7 @@ import Results from './components/Results';
 import BackgroundLoop from './components/BackgroundLoop';
 import LandingPage from './components/LandingPage';
 import LegalPage from './components/LegalPage';
+import AuthPage from './components/AuthPage';
 import { Sparkles, User, LogOut } from 'lucide-react';
 import './App.css';
 

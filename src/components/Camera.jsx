@@ -1,5 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Camera as CameraIcon, Upload, Image, RefreshCw } from 'lucide-react';
+import { Camera as CapacitorCamera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 import './Camera.css';
 
 const Camera = ({ onCapture }) => {
@@ -9,17 +11,23 @@ const Camera = ({ onCapture }) => {
     const [stream, setStream] = useState(null);
     const [error, setError] = useState(null);
     const [facingMode, setFacingMode] = useState('user'); // 'user' for front, 'environment' for back
+    const isNative = Capacitor.isNativePlatform();
 
     useEffect(() => {
-        startCamera();
-        return () => stopCamera();
+        // Always try to start the live preview first
+        startWebCamera();
+        return () => stopWebCamera();
     }, [facingMode]);
 
-    const startCamera = async () => {
+    const startWebCamera = async () => {
         try {
-            // Stop existing stream first
-            stopCamera();
+            stopWebCamera();
             setError(null);
+
+            // Check if API exists
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error("Camera API not available");
+            }
 
             const mediaStream = await navigator.mediaDevices.getUserMedia({
                 video: {
@@ -34,26 +42,23 @@ const Camera = ({ onCapture }) => {
 
             if (videoRef.current) {
                 videoRef.current.srcObject = mediaStream;
-                // Ensure video plays
                 videoRef.current.play().catch(e => console.log('Video play error:', e));
             }
 
         } catch (err) {
-            console.error("Camera error:", err);
-            console.error("Error name:", err.name);
-            console.error("Error message:", err.message);
-            setError(true);
+            console.error("Web Camera failed, falling back to native/upload:", err);
+            setError(true); // This triggers the fallback UI
         }
     };
 
-    const stopCamera = () => {
+    const stopWebCamera = () => {
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
             setStream(null);
         }
     };
 
-    const handleCapture = () => {
+    const handleWebCapture = () => {
         if (videoRef.current && canvasRef.current) {
             const video = videoRef.current;
             const canvas = canvasRef.current;
@@ -65,6 +70,23 @@ const Camera = ({ onCapture }) => {
 
             const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
             onCapture(imageDataUrl);
+        }
+    };
+
+    const handleNativeCapture = async () => {
+        try {
+            const image = await CapacitorCamera.getPhoto({
+                quality: 90,
+                allowEditing: false,
+                resultType: CameraResultType.DataUrl,
+                source: CameraSource.Camera
+            });
+
+            if (image.dataUrl) {
+                onCapture(image.dataUrl);
+            }
+        } catch (e) {
+            console.log("User cancelled or error", e);
         }
     };
 
@@ -90,32 +112,48 @@ const Camera = ({ onCapture }) => {
     return (
         <div className="camera-container glass">
             {error ? (
-                <div className="camera-fallback">
+                /* Fallback UI (Native Button or Upload) */
+                <div className="native-camera-ui center">
                     <div className="upload-prompt">
-                        <Upload size={64} color="var(--neon-green)" />
-                        <p className="neon-text" style={{ marginTop: '20px' }}>CAMERA ACCESS NEEDED</p>
-                        <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '10px', maxWidth: '320px', textAlign: 'center' }}>
-                            Click "Allow" when your browser asks for camera permission, or upload a photo instead.
+                        <CameraIcon size={64} color="var(--neon-green)" />
+                        <p className="neon-text" style={{ marginTop: '20px' }}>
+                            {isNative ? "READY TO SCAN" : "CAMERA ACCESS NEEDED"}
                         </p>
-                        <button
-                            className="upload-btn-large"
-                            onClick={startCamera}
-                            style={{ marginTop: '20px', marginBottom: '10px' }}
-                        >
-                            TRY CAMERA AGAIN
-                        </button>
-                        <button className="upload-btn-large" onClick={triggerFileUpload}>
-                            UPLOAD PHOTO
+                        <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '10px', maxWidth: '300px', textAlign: 'center' }}>
+                            {isNative
+                                ? "Tap below to open the native camera."
+                                : "Allow camera access or upload a photo."}
+                        </p>
+
+                        {isNative ? (
+                            <button
+                                className="upload-btn-large"
+                                onClick={handleNativeCapture}
+                                style={{ marginTop: '30px' }}
+                            >
+                                OPEN CAMERA
+                            </button>
+                        ) : (
+                            <button
+                                className="upload-btn-large"
+                                onClick={startWebCamera}
+                                style={{ marginTop: '20px', marginBottom: '10px' }}
+                            >
+                                TRY CAMERA AGAIN
+                            </button>
+                        )}
+
+                        <button className="text-btn" onClick={triggerFileUpload} style={{ marginTop: '20px' }}>
+                            {isNative ? "Or upload from gallery" : "UPLOAD PHOTO"}
                         </button>
                     </div>
                 </div>
             ) : (
+                /* Live Preview UI */
                 <>
                     <div className="video-wrapper">
                         <video ref={videoRef} autoPlay playsInline muted className="camera-feed" />
                         <div className="scan-line"></div>
-
-                        {/* Camera switch button */}
                         <button className="switch-camera-btn" onClick={switchCamera}>
                             <RefreshCw size={24} />
                         </button>
@@ -126,14 +164,14 @@ const Camera = ({ onCapture }) => {
                             <Image size={28} />
                         </button>
 
-                        <button className="capture-btn" onClick={handleCapture}>
+                        <button className="capture-btn" onClick={handleWebCapture}>
                             <div className="capture-btn-inner">
                                 <CameraIcon size={48} color="#000" />
                             </div>
                             <div className="capture-glow"></div>
                         </button>
 
-                        <div style={{ width: '50px' }}></div> {/* Spacer for symmetry */}
+                        <div style={{ width: '50px' }}></div>
                     </div>
                 </>
             )}
